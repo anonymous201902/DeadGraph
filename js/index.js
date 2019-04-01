@@ -53,6 +53,7 @@ function type(d) {
     posX: "0.11872752010822296"
     posY: "0.0016297217225655913"*/
     d.age=+d.age;
+    d.prevAge=-1;
     d.biomarker1_albumin=+d.biomarker1_albumin;
     d.biomarker2_k=+d.biomarker2_k;
     d.cluster=+d.cluster;
@@ -67,6 +68,9 @@ function type(d) {
 }
 var clu_info;
 var patients=[];
+var ages=[];
+for (var yy=10;yy<120;yy++)
+    for (var mm=1;mm<=12;mm++)ages[ages.length]=yy+0.01*mm;
 function getColorofPatient(p){
     return d3.hsl(parseInt(360*(patients.indexOf(p)/patients.length)),0.5,0.6)
 }
@@ -79,13 +83,18 @@ d3.csv("clu_info.csv",type,function (err,data) {
     console.log(data);
     clu_info=data;
     var k=0;
+    var lastSeenAge={};
     for(var i=0;i<clu_info.length;i++){
         var d=clu_info[i];
-        if(patients.indexOf(d.patient)==-1)
-            patients[k++]=d.patient;
+        if(patients.indexOf(d.patient)==-1) {
+            patients[k++] = d.patient;
+            clu_info[i].prevAge=d.age;
+        }else clu_info[i].prevAge=lastSeenAge[d.patient];
+        lastSeenAge[d.patient]=d.age;
     };
     drawAxis();
     drawPoint();
+    drawControl();
 });
 var width = window.innerWidth-16, height = window.innerHeight-16;
 
@@ -93,9 +102,10 @@ d3.select('.container').style("width",width+"px").style("height",height+"px");
 var padding = { top: 50, right: 50, bottom: 50, left: 50 };
 // 创建一个分组用来组合要画的图表元素
 
-var main = d3.select('.container svg').append('g')
+var main = d3.select('#mainsvg').append('g')
     // 设置该分组的transform属性
     .attr('transform', "translate(" + padding.top + ',' + padding.left + ')');
+var control=d3.select("#controlsvg");
 var xScale;
 var yScale;
 function drawAxis() {
@@ -154,12 +164,12 @@ function drawPoint(){
         .attr('cy',function (d) {
             return yScale(d.posY)
         })
-        .attr('r',2)
+        .attr('r',3)
         .style('fill',function (d){
             return getColorofPatient(d.patient);
         })
         .style('fill-opacity','0.5');
-
+/*
     main.selectAll('.point')
         .on("mouseover",function(d,i){
             d3.select(this)
@@ -171,6 +181,75 @@ function drawPoint(){
             d3.select(this)
                 .transition()
                 .duration(100)
-                .attr('r',2);
+                .attr('r',1);
+        });*/
+}
+var mouseoverPatientCount=0;
+function drawControl() {
+
+    var width=document.getElementById("mainsvg").width.baseVal.value;
+    var height=document.getElementById("mainsvg").height.baseVal.value;
+    control.selectAll('.patientRect').data(patients).enter()
+        .append('rect').attr('class','patientRect')
+        .attr('x',function (d) {
+            return patients.indexOf(d)*width/patients.length;
+        })
+        .attr('y',40).attr('width',1.0*width/patients.length).attr('height',20)
+        .style('fill',function (d){
+        return getColorofPatient(d);
+        })
+        .on("mouseover",function (d,i) {
+            //console.log(d);
+
+            if(mouseoverPatientCount==0) {
+                main.selectAll(".point").filter(function (dd, i) {
+                    return dd.patient != d
+                }).style('fill-opacity', '0.0');
+            }
+            mouseoverPatientCount++;
+            main.selectAll(".point").filter(function(dd,i){return dd.patient==d}).style('fill-opacity','0.9');
+        })
+        .on("mouseout",function (d,i) {
+            //console.log(d);
+            main.selectAll(".point").filter(function(dd,i){return dd.patient==d}).style('fill-opacity','0.0');
+            setTimeout(function () {
+                mouseoverPatientCount--;
+                if(mouseoverPatientCount==0) {
+                    console.log('called');
+                    main.selectAll(".point").transition().duration(100).style('fill-opacity', '0.5');
+                }
+            },100);
         });
+
+    control.selectAll('.ageRect').data(ages).enter()
+        .append('rect').attr('class','ageRect')
+        .attr('x',function (d) {
+            return ages.indexOf(d)*width/ages.length;
+        })
+        .attr('y',100).attr('width',1.0*width/ages.length).attr('height',20)
+        .style('fill','cyan')
+        .on("mouseover",function (d,i) {
+            //console.log(d);
+
+            if(mouseoverPatientCount==0) {
+                main.selectAll(".point").filter(function (dd, i) {
+                    return dd.age != d
+                }).style('fill-opacity', '0.0');
+            }
+            mouseoverPatientCount++;
+            main.selectAll(".point").filter(function(dd,i){return dd.age>=d&&dd.prevAge<d}).style('fill-opacity',0.9);
+            //main.selectAll(".point").filter(function(dd,i){return !(dd.age>=d&&dd.prevAge<d)}).style('fill-opacity','0.0');
+        })
+        .on("mouseout",function (d,i) {
+            //console.log(d);
+            main.selectAll(".point").filter(function(dd,i){return (dd.age>=d&&dd.prevAge<d)}).style('fill-opacity','0.0');
+            setTimeout(function () {
+                mouseoverPatientCount--;
+                if(mouseoverPatientCount==0) {
+                    console.log('called');
+                    main.selectAll(".point").transition().duration(100).style('fill-opacity', '0.5');
+                }
+            },100);
+        });
+
 }
