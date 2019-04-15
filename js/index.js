@@ -1,44 +1,3 @@
-/*
-var width = 420,
-    barHeight = 20;
-
-var x = d3.scale.linear()
-    .range([0, width]);
-
-var chart = d3.select(".chart")
-    .attr("width", width);
-
-d3.csv("data.csv", type, function(error, data) {
-    x.domain([0, d3.max(data, function(d) { return d.value; })]);
-
-    chart.attr("height", barHeight * data.length);
-
-    var bar = chart.selectAll("g")
-        .data(data)
-        .enter().append("g")
-        .attr("transform", function(d, i) { return "translate(0," + i * barHeight + ")"; });
-
-    bar.append("rect")
-        .attr("width", function(d) { return x(d.value); })
-        .attr("height", barHeight - 1)
-        .transition()
-        .attr("width", function(d) { return x(d.value*0.5); }).duration(1000);
-
-    bar.append("text")
-        .attr("x", function(d) { return x(d.value) - 3; })
-        .attr("y", barHeight / 2)
-        .attr("dy", ".35em")
-        .text(function(d) { return d.value; })
-        .transition()
-        .attr("x", function(d) { return x(d.value*0.5) - 3; }).duration(1000);
-});
-
-function type(d) {
-    d.value = +d.value; // coerce to number
-    return d;
-}
-*/
-
 function type(d) {
     /*
     age: "58.04"
@@ -54,6 +13,7 @@ function type(d) {
     posY: "0.0016297217225655913"*/
     d.age=+d.age;
     d.prevAge=-1;
+    d.prevIndex=-1;
     d.biomarker1_albumin=+d.biomarker1_albumin;
     d.biomarker2_k=+d.biomarker2_k;
     d.cluster=+d.cluster;
@@ -68,11 +28,18 @@ function type(d) {
 }
 var clu_info;
 var patients=[];
+var patientsObjs={};
 var ages=[];
+var line=d3.svg.line().interpolate("cardinal")
 for (var yy=10;yy<120;yy++)
     for (var mm=1;mm<=12;mm++)ages[ages.length]=yy+0.01*mm;
 function getColorofPatient(p){
-    return d3.hsl(parseInt(360*(patients.indexOf(p)/patients.length)),0.5,0.6)
+    return d3.hsl(parseInt(300*(patients.indexOf(p)/patients.length)),0.5,0.6)
+
+
+}
+function getColorbyDeathRisk(r){
+    return d3.hsl(parseInt(270*r),0.5,0.6)
 }
 d3.csv("clu_info.csv",type,function (err,data) {
 
@@ -83,22 +50,35 @@ d3.csv("clu_info.csv",type,function (err,data) {
     console.log(data);
     clu_info=data;
     var k=0;
-    var lastSeenAge={};
+    var lastSeenPoint={};
+    drawAxis();
+
     for(var i=0;i<clu_info.length;i++){
         var d=clu_info[i];
         if(patients.indexOf(d.patient)==-1) {
-            patients[k++] = d.patient;
+            patients[k] = d.patient;
+            patientsObjs[d.patient]={path:[],firstDate:-1,deathDate:-1};
+            patientsObjs[d.patient].path.push([xScale(d.posX),yScale(d.posY)]);
+            k++;
             clu_info[i].prevAge=d.age;
-        }else clu_info[i].prevAge=lastSeenAge[d.patient];
-        lastSeenAge[d.patient]=d.age;
+            patientsObjs[d.patient].firstDate=d.age;
+            patientsObjs[d.patient].deathDate=d.age;
+        }else {
+            clu_info[i].prevAge=clu_info[lastSeenPoint[d.patient]].age;
+            clu_info[i].prevIndex=lastSeenPoint[d.patient];
+            patientsObjs[d.patient].path.push([xScale(d.posX),yScale(d.posY)]);
+            patientsObjs[d.patient].deathDate=d.age;
+        }
+        lastSeenPoint[d.patient]=i;
     };
-    drawAxis();
+
     drawPoint();
+    drawLine();
     drawControl();
 });
 var width = window.innerWidth-16, height = window.innerHeight-16;
 
-d3.select('.container').style("width",width+"px").style("height",height+"px");
+//d3.select('.container0').style("width",width+"px").style("height",height+"px");
 var padding = { top: 50, right: 50, bottom: 50, left: 50 };
 // 创建一个分组用来组合要画的图表元素
 
@@ -166,7 +146,7 @@ function drawPoint(){
         })
         .attr('r',3)
         .style('fill',function (d){
-            return getColorofPatient(d.patient);
+            return getColorbyDeathRisk(d.death_risk);
         })
         .style('fill-opacity','0.5');
 /*
@@ -215,8 +195,8 @@ function drawControl() {
             setTimeout(function () {
                 mouseoverPatientCount--;
                 if(mouseoverPatientCount==0) {
-                    console.log('called');
-                    main.selectAll(".point").transition().duration(100).style('fill-opacity', '0.5');
+                    //console.log('called');
+                    main.selectAll(".point").style('fill-opacity', '0.5');
                 }
             },100);
         });
@@ -238,6 +218,8 @@ function drawControl() {
             }
             mouseoverPatientCount++;
             main.selectAll(".point").filter(function(dd,i){return dd.age>=d&&dd.prevAge<d}).style('fill-opacity',0.9);
+            main.selectAll(".line").filter(function (dd,i) {return patientsObjs[dd].firstDate<=d&&patientsObjs[dd].deathDate>=d}).style('stroke-opacity','0.5');
+            main.selectAll(".line").filter(function (dd,i) {return !(patientsObjs[dd].firstDate<=d&&patientsObjs[dd].deathDate>=d)}).style('stroke-opacity','0.0');
             //main.selectAll(".point").filter(function(dd,i){return !(dd.age>=d&&dd.prevAge<d)}).style('fill-opacity','0.0');
         })
         .on("mouseout",function (d,i) {
@@ -246,10 +228,20 @@ function drawControl() {
             setTimeout(function () {
                 mouseoverPatientCount--;
                 if(mouseoverPatientCount==0) {
-                    console.log('called');
-                    main.selectAll(".point").transition().duration(100).style('fill-opacity', '0.5');
+                    //console.log('called');
+                    main.selectAll(".point").style('fill-opacity', '0.5');
+                    main.selectAll(".line").style('stroke-opacity','0.5');
                 }
             },100);
         });
 
+}
+
+function drawLine() {
+    main.selectAll(".line").data(patients).enter()
+        .append('path').attr('class','line')
+        .attr('d',function(d){return line(patientsObjs[d].path)})
+        .attr('fill','none')
+        .attr('stroke',function(d){return getColorofPatient(d)})
+        .style('stroke-opacity','0.5')
 }
