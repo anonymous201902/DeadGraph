@@ -164,12 +164,14 @@ function drawPoint(){
         .on("mouseover",function (d,i) {
             d3.select("#textInfo1").text("患者："+d.patient);
             d3.select("#textInfo2").text("年龄："+d.age);
+            d3.select("#textInfo3").text("所属簇："+d.cluster);
             filterbyPatient(d.patient);
         })
         .on("mouseout",function (d,i) {
 
             d3.select("#textInfo1").text("");
             d3.select("#textInfo2").text("");
+            d3.select("#textInfo3").text("");
             filterbyPatientCancel(d.patient);
         })
 /*
