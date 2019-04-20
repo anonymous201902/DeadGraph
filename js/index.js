@@ -27,6 +27,7 @@ function type(d) {
     return d;
 }
 var clu_info;
+var cluster;
 var patients=[];
 var patientsObjs={};
 var ages=[];
@@ -39,8 +40,9 @@ function getColorofPatient(p){
 
 }
 function getColorbyDeathRisk(r){
-    return d3.hsl(parseInt(270*r),0.5,0.6)
+    return d3.rgb(parseInt(255*Math.sqrt(r)),parseInt(255-255*Math.sqrt(r)),0)
 }
+
 d3.csv("clu_info.csv",type,function (err,data) {
 
     if(err){
@@ -52,7 +54,6 @@ d3.csv("clu_info.csv",type,function (err,data) {
     var k=0;
     var lastSeenPoint={};
     drawAxis();
-
     for(var i=0;i<clu_info.length;i++){
         var d=clu_info[i];
         if(patients.indexOf(d.patient)==-1) {
@@ -72,9 +73,20 @@ d3.csv("clu_info.csv",type,function (err,data) {
         lastSeenPoint[d.patient]=i;
     };
 
-    drawPoint();
-    drawLine();
-    drawControl();
+    d3.csv("cluster.csv",function (err,data) {
+
+        if (err) {
+            alert("error loading data");
+            return;
+        }
+        //console.log(data);
+        cluster=data;
+
+        drawCluster();
+        drawLine();
+        drawPoint();
+        drawControl();
+    });
 });
 var width = window.innerWidth-16, height = window.innerHeight-16;
 
@@ -148,7 +160,18 @@ function drawPoint(){
         .style('fill',function (d){
             return getColorbyDeathRisk(d.death_risk);
         })
-        .style('fill-opacity','0.5');
+        .style('fill-opacity','0.5')
+        .on("mouseover",function (d,i) {
+            d3.select("#textInfo1").text("患者："+d.patient);
+            d3.select("#textInfo2").text("年龄："+d.age);
+            filterbyPatient(d.patient);
+        })
+        .on("mouseout",function (d,i) {
+
+            d3.select("#textInfo1").text("");
+            d3.select("#textInfo2").text("");
+            filterbyPatientCancel(d.patient);
+        })
 /*
     main.selectAll('.point')
         .on("mouseover",function(d,i){
@@ -180,25 +203,13 @@ function drawControl() {
         })
         .on("mouseover",function (d,i) {
             //console.log(d);
-
-            if(mouseoverPatientCount==0) {
-                main.selectAll(".point").filter(function (dd, i) {
-                    return dd.patient != d
-                }).style('fill-opacity', '0.0');
-            }
-            mouseoverPatientCount++;
-            main.selectAll(".point").filter(function(dd,i){return dd.patient==d}).style('fill-opacity','0.9');
+            d3.select("#textInfo1").text("当前患者："+d);
+            filterbyPatient(d);
         })
         .on("mouseout",function (d,i) {
             //console.log(d);
-            main.selectAll(".point").filter(function(dd,i){return dd.patient==d}).style('fill-opacity','0.0');
-            setTimeout(function () {
-                mouseoverPatientCount--;
-                if(mouseoverPatientCount==0) {
-                    //console.log('called');
-                    main.selectAll(".point").style('fill-opacity', '0.5');
-                }
-            },100);
+            d3.select("#textInfo1").text("");
+            filterbyPatientCancel(d);
         });
 
     control.selectAll('.ageRect').data(ages).enter()
@@ -210,31 +221,70 @@ function drawControl() {
         .style('fill','cyan')
         .on("mouseover",function (d,i) {
             //console.log(d);
-
-            if(mouseoverPatientCount==0) {
-                main.selectAll(".point").filter(function (dd, i) {
-                    return dd.age != d
-                }).style('fill-opacity', '0.0');
-            }
-            mouseoverPatientCount++;
-            main.selectAll(".point").filter(function(dd,i){return dd.age>=d&&dd.prevAge<d}).style('fill-opacity',0.9);
-            main.selectAll(".line").filter(function (dd,i) {return patientsObjs[dd].firstDate<=d&&patientsObjs[dd].deathDate>=d}).style('stroke-opacity','0.5');
-            main.selectAll(".line").filter(function (dd,i) {return !(patientsObjs[dd].firstDate<=d&&patientsObjs[dd].deathDate>=d)}).style('stroke-opacity','0.0');
-            //main.selectAll(".point").filter(function(dd,i){return !(dd.age>=d&&dd.prevAge<d)}).style('fill-opacity','0.0');
-        })
+            d3.select("#textInfo1").text("当前年龄："+d);
+            filterbyAge(d);
+            })
         .on("mouseout",function (d,i) {
             //console.log(d);
-            main.selectAll(".point").filter(function(dd,i){return (dd.age>=d&&dd.prevAge<d)}).style('fill-opacity','0.0');
-            setTimeout(function () {
-                mouseoverPatientCount--;
-                if(mouseoverPatientCount==0) {
-                    //console.log('called');
-                    main.selectAll(".point").style('fill-opacity', '0.5');
-                    main.selectAll(".line").style('stroke-opacity','0.5');
-                }
-            },100);
+
+            d3.select("#textInfo1").text("");
+            filterbyAgeCancel(d);
         });
 
+}
+function filterbyPatient(d){
+    if(mouseoverPatientCount==0) {
+        main.selectAll(".point").filter(function (dd, i) {
+            return dd.patient != d
+        }).style('fill-opacity', '0.0');
+        main.selectAll(".line").filter(function (dd, i) {
+            return dd != d
+        }).style('stroke-opacity', '0.0');
+    }
+    mouseoverPatientCount++;
+    main.selectAll(".point").filter(function(dd,i){return dd.patient==d}).style('fill-opacity','0.9');
+    main.selectAll(".line").filter(function(dd,i){return dd==d}).style('stroke-opacity','0.9');
+}
+function filterbyPatientCancel(d){
+
+    main.selectAll(".point").filter(function(dd,i){return dd.patient==d}).style('fill-opacity','0.0');
+    main.selectAll(".line").filter(function(dd,i){return dd==d}).style('stroke-opacity','0.0');
+    setTimeout(function () {
+        mouseoverPatientCount--;
+        if(mouseoverPatientCount==0) {
+            //console.log('called');
+
+
+            main.selectAll(".point").style('fill-opacity', '0.5');
+            main.selectAll(".line").style('stroke-opacity', '0.5');
+        }
+    },10);
+}
+
+function filterbyAge(d) {
+    if(mouseoverPatientCount==0) {
+        main.selectAll(".point").filter(function (dd, i) {
+            return dd.age != d
+        }).style('fill-opacity', '0.0');
+    }
+    mouseoverPatientCount++;
+    main.selectAll(".point").filter(function(dd,i){return dd.age>=d&&dd.prevAge<d}).style('fill-opacity',0.9);
+    main.selectAll(".line").filter(function (dd,i) {return patientsObjs[dd].firstDate<=d&&patientsObjs[dd].deathDate>=d}).style('stroke-opacity','0.5');
+    main.selectAll(".line").filter(function (dd,i) {return !(patientsObjs[dd].firstDate<=d&&patientsObjs[dd].deathDate>=d)}).style('stroke-opacity','0.0');
+    //main.selectAll(".point").filter(function(dd,i){return !(dd.age>=d&&dd.prevAge<d)}).style('fill-opacity','0.0');
+}
+function filterbyAgeCancel(d) {
+    main.selectAll(".point").filter(function(dd,i){return (dd.age>=d&&dd.prevAge<d)}).style('fill-opacity','0.0');
+    setTimeout(function () {
+        mouseoverPatientCount--;
+        if(mouseoverPatientCount==0) {
+            //console.log('called');
+
+            d3.select("#textInfo1").text("");
+            main.selectAll(".point").style('fill-opacity', '0.5');
+            main.selectAll(".line").style('stroke-opacity','0.5');
+        }
+    },10);
 }
 
 function drawLine() {
@@ -243,5 +293,48 @@ function drawLine() {
         .attr('d',function(d){return line(patientsObjs[d].path)})
         .attr('fill','none')
         .attr('stroke',function(d){return getColorofPatient(d)})
-        .style('stroke-opacity','0.5')
+        .attr('stroke-width',2)
+        .style('stroke-opacity','0.5');
+}
+
+function drawCluster() {
+    for(var i=0;i<cluster.length;i++){
+        cluster[i].dataDistance=[];
+    }
+    for(var i=0;i<clu_info.length;i++) {
+        var d = clu_info[i];
+        var cx=xScale(cluster[d.cluster].centerX);
+        var cy=yScale(cluster[d.cluster].centerY);
+        var dx=xScale(d.posX);
+        var dy=yScale(d.posY);
+        cluster[d.cluster].dataDistance.push(Math.sqrt((cx-dx)*(cx-dx)+(cy-dy)*(cy-dy)));
+
+
+    }
+
+    for(var i=0;i<cluster.length;i++){
+        cluster[i].dataDistance.sort(function sortNumber(a,b)
+            {
+                return a - b
+            }
+        );
+    }
+    console.log(cluster);
+    main.selectAll(".pointCluster").data(cluster).enter()
+        .append('circle').attr("class","pointCluster")
+        .attr('cx',function (d) {
+            return xScale(d.centerX)
+        })
+        .attr('cy',function (d) {
+            return yScale(d.centerY)
+        })
+        .attr('r',function (d) {
+            return d.dataDistance[d.dataDistance.length-1]+3
+        })
+        .style('fill',function (d){
+            return getColorbyDeathRisk(d.death_risk);
+        })
+        .style('fill-opacity',0.05)
+        .style('stroke',d3.rgb(0,0,0))
+        .style('stroke-opacity',0.05);
 }
