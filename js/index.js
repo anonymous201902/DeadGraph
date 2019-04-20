@@ -319,9 +319,14 @@ function drawCluster() {
             }
         );
     }
+    cluster.sort(function sortby(a,b){
+        return(b.dataDistance.length-a.dataDistance.length);
+    });
     console.log(cluster);
     main.selectAll(".pointCluster").data(cluster).enter()
+
         .append('circle').attr("class","pointCluster")
+        //.filter(function (dd,i){return i<=10})
         .attr('cx',function (d) {
             return xScale(d.centerX)
         })
