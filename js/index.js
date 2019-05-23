@@ -42,7 +42,9 @@ function type(d) {
     d.im.Weight=+d.im_Weight;
     d.im.Systolic=+d.im_Systolic;
     d.im.Diastolic=+d.im_Diastolic;
-
+    d.ima=[];
+    for(var index in d.im)d.ima.push([index,d.im[index]]);
+    d.ima.sort(function (a,b) { return -a[1]+b[1]; });
     return d;
 }
 var clu_info;
@@ -183,11 +185,20 @@ function drawPoint(){
         .style('fill-opacity','0.5')
         .style('stroke-width',0)
         .on("mouseover",function (d,i) {
+            filterbyPatient(d.patient);
             d3.select("#panelInfo1").text("Patient："+d.patient);
             d3.select("#panelInfo2").text("Age："+d.age);
             d3.select("#panelInfo3").text("Cluster："+d.cluster);
             d3.select("#infoPanel").attr("transform","translate("+((xScale(d.posX)+50-panelW+20)>0?(xScale(d.posX)+50-panelW+20):(xScale(d.posX)+50+20))+","+((yScale(d.posY)+50-panelH-20)>0?(yScale(d.posY)+50-panelH-20):(yScale(d.posY)+50+20))+")").attr("display","");
-            filterbyPatient(d.patient);
+            d3.select("#panelCNum1").text(d.ima[0][1].toFixed(3));
+            d3.select("#panelCNum2").text(d.ima[1][1].toFixed(3));
+            d3.select("#panelCNum3").text(d.ima[2][1].toFixed(3));
+            d3.select("#panelCInfo1").text(d.ima[0][0]);
+            d3.select("#panelCInfo2").text(d.ima[1][0]);
+            d3.select("#panelCInfo3").text(d.ima[2][0]);
+            d3.select("#panelCircle1").attr("r",d.ima[0][1]*100);
+            d3.select("#panelCircle2").attr("r",d.ima[1][1]*100);
+            d3.select("#panelCircle3").attr("r",d.ima[2][1]*100);
         })
         .on("mouseout",function (d,i) {
 
