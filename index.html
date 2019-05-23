@@ -25,7 +25,7 @@
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">配置</h5>
+                <h5 class="modal-title" id="exampleModalLabel">Options</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -44,24 +44,27 @@
         <div class="containerMainsvg" style=" width:100% ;height:calc(100% - 150px)">
 
             <svg id="mainsvg" width="100%" height="100%">
-
+                <g id="gdata"></g>
                 <g id="info" transform="translate(70,50)">
                     <text x="0" y="0" fill="black" id="textInfo1"></text>
                     <text x="0" y="20" fill="black" id="textInfo2"></text>
                     <text x="0" y="40" fill="black" id="textInfo3"></text>
                 </g>
                 <g id="infoPanel" transform="translate(10,10)" display="none">
-                    <rect x="0" y="0" width="200" height="200" fill="white" stroke="black" stroke-opacity="0.5" stroke-width="2" fill-opacity="1"></rect>
+                    <rect x="0" y="0" width="350" height="200" fill="white" stroke="black" stroke-opacity="0.5" stroke-width="2" fill-opacity="1"></rect>
                     <text x="10" y="20" fill="black" id="panelInfo1"></text>
-                    <text x="10" y="40" fill="black" id="panelInfo2"></text>
-                    <text x="10" y="60" fill="black" id="panelInfo3"></text>
+                    <text x="120" y="20" fill="black" id="panelInfo2"></text>
+                    <text x="230" y="20" fill="black" id="panelInfo3"></text>
+                    <circle r="20" cx="65" cy="110" id="panelCircle1"></circle>
+                    <circle r="20" cx="175" cy="110" id="panelCircle2"></circle>
+                    <circle r="20" cx="285" cy="110" id="panelCircle3"></circle>
                 </g>
             </svg>
         </div>
         <div class="containerMainsvg" style=" width:100% ;height:150px">
             <svg id="controlsvg" width="100%" height="100%">
-                <text x="0" y="30" fill="black">按患者筛选</text>
-                <text x="0" y="90" fill="black">按年龄筛选</text>
+                <text x="0" y="30" fill="black">Filter By Patients</text>
+                <text x="0" y="90" fill="black">Filter By Age</text>
             </svg>
         </div>
     </div>

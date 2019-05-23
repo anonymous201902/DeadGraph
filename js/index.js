@@ -11,6 +11,7 @@ function type(d) {
     patient: "98"
     posX: "0.11872752010822296"
     posY: "0.0016297217225655913"*/
+    d.im={};
     d.age=+d.age;
     d.prevAge=-1;
     d.prevIndex=-1;
@@ -24,6 +25,24 @@ function type(d) {
     d.patient=+d.patient;
     d.posX=+d.posX;
     d.posY=+d.posY;
+    d.im.Cl=+d.im_Cl;
+    d.im.CO2CP=+d.im_CO2CP;
+    d.im.WBC=+d.im_WBC;
+    d.im.Hb=+d.im_Hb;
+    d.im.Urea=+d.im_Urea;
+    d.im.Ca=+d.im_Ca;
+    d.im.K=+d.im_K;
+    d.im.Na=+d.im_Na;
+    d.im.Scr=+d.im_Scr;
+    d.im.P=+d.im_P;
+    d.im.Albumin=+d.im_Albumin;
+    d.im.hsCRP=+d.im_hsCRP;
+    d.im.Glucose=+d.im_Glucose;
+    d.im.Appetite=+d.im_Appetite;
+    d.im.Weight=+d.im_Weight;
+    d.im.Systolic=+d.im_Systolic;
+    d.im.Diastolic=+d.im_Diastolic;
+
     return d;
 }
 var clu_info;
@@ -93,8 +112,9 @@ var width = window.innerWidth-16, height = window.innerHeight-16;
 //d3.select('.container0').style("width",width+"px").style("height",height+"px");
 var padding = { top: 50, right: 50, bottom: 50, left: 50 };
 // 创建一个分组用来组合要画的图表元素
-
-var main = d3.select('#mainsvg').append('g')
+var panelW=350;
+var panelH=200;
+var main = d3.select('#gdata')
     // 设置该分组的transform属性
     .attr('transform', "translate(" + padding.top + ',' + padding.left + ')');
 var control=d3.select("#controlsvg");
@@ -163,10 +183,10 @@ function drawPoint(){
         .style('fill-opacity','0.5')
         .style('stroke-width',0)
         .on("mouseover",function (d,i) {
-            d3.select("#panelInfo1").text("患者："+d.patient);
-            d3.select("#panelInfo2").text("年龄："+d.age);
-            d3.select("#panelInfo3").text("所属簇："+d.cluster);
-            d3.select("#infoPanel").attr("transform","translate("+(xScale(d.posX)+50)+","+(yScale(d.posY)+50)+")").attr("display","");
+            d3.select("#panelInfo1").text("Patient："+d.patient);
+            d3.select("#panelInfo2").text("Age："+d.age);
+            d3.select("#panelInfo3").text("Cluster："+d.cluster);
+            d3.select("#infoPanel").attr("transform","translate("+((xScale(d.posX)+50-panelW+20)>0?(xScale(d.posX)+50-panelW+20):(xScale(d.posX)+50+20))+","+((yScale(d.posY)+50-panelH-20)>0?(yScale(d.posY)+50-panelH-20):(yScale(d.posY)+50+20))+")").attr("display","");
             filterbyPatient(d.patient);
         })
         .on("mouseout",function (d,i) {
@@ -212,7 +232,7 @@ function drawControl() {
         })
         .on("mouseover",function (d,i) {
             //console.log(d);
-            d3.select("#textInfo1").text("当前患者："+d);
+            d3.select("#textInfo1").text("Patient："+d);
             filterbyPatient(d);
         })
         .on("mouseout",function (d,i) {
@@ -230,7 +250,7 @@ function drawControl() {
         .style('fill','cyan')
         .on("mouseover",function (d,i) {
             //console.log(d);
-            d3.select("#textInfo1").text("当前年龄："+d);
+            d3.select("#textInfo1").text("Age："+d);
             filterbyAge(d);
             })
         .on("mouseout",function (d,i) {
