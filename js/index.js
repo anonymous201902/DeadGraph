@@ -189,7 +189,7 @@ function drawPoint(){
             d3.select("#panelInfo1").text("Patient："+d.patient);
             d3.select("#panelInfo2").text("Age："+d.age);
             d3.select("#panelInfo3").text("Cluster："+d.cluster);
-            d3.select("#infoPanel").attr("transform","translate("+((xScale(d.posX)+50-panelW+20)>0?(xScale(d.posX)+50-panelW+20):(xScale(d.posX)+50+20))+","+((yScale(d.posY)+50-panelH-20)>0?(yScale(d.posY)+50-panelH-20):(yScale(d.posY)+50+20))+")").attr("display","");
+            d3.select("#infoPanel").attr("transform","translate("+((xScale(d.posX)+50-panelW-20)>0?(xScale(d.posX)+50-panelW-20):(xScale(d.posX)+50+20))+","+((yScale(d.posY)+50-panelH-20)>0?(yScale(d.posY)+50-panelH-20):(yScale(d.posY)+50+20))+")").attr("display","");
             d3.select("#panelCNum1").text(d.ima[0][1].toFixed(3));
             d3.select("#panelCNum2").text(d.ima[1][1].toFixed(3));
             d3.select("#panelCNum3").text(d.ima[2][1].toFixed(3));
