@@ -161,19 +161,26 @@ function drawPoint(){
             return getColorbyDeathRisk(d.death_risk);
         })
         .style('fill-opacity','0.5')
+        .style('stroke-width',0)
         .on("mouseover",function (d,i) {
-            d3.select("#textInfo1").text("患者："+d.patient);
-            d3.select("#textInfo2").text("年龄："+d.age);
-            d3.select("#textInfo3").text("所属簇："+d.cluster);
+            d3.select("#panelInfo1").text("患者："+d.patient);
+            d3.select("#panelInfo2").text("年龄："+d.age);
+            d3.select("#panelInfo3").text("所属簇："+d.cluster);
+            d3.select("#infoPanel").attr("transform","translate("+(xScale(d.posX)+50)+","+(yScale(d.posY)+50)+")").attr("display","");
             filterbyPatient(d.patient);
         })
         .on("mouseout",function (d,i) {
 
-            d3.select("#textInfo1").text("");
-            d3.select("#textInfo2").text("");
-            d3.select("#textInfo3").text("");
+            // d3.select("#panelInfo1").text("");
+            // d3.select("#panelInfo2").text("");
+            // d3.select("#panelInfo3").text("");
+            d3.select("#infoPanel").attr("display","none");
             filterbyPatientCancel(d.patient);
-        })
+        });
+    main.selectAll('.point').filter(function(dd,i){return dd.death_risk==1})
+        .style('stroke',d3.rgb(0,0,0))
+        .style('stroke-width',2)
+        .style('stroke-opacity',0.5);
 /*
     main.selectAll('.point')
         .on("mouseover",function(d,i){
@@ -238,27 +245,27 @@ function filterbyPatient(d){
     if(mouseoverPatientCount==0) {
         main.selectAll(".point").filter(function (dd, i) {
             return dd.patient != d
-        }).style('fill-opacity', '0.0');
+        }).attr("display","none");
         main.selectAll(".line").filter(function (dd, i) {
             return dd != d
-        }).style('stroke-opacity', '0.0');
+        }).attr("display","none");
     }
     mouseoverPatientCount++;
-    main.selectAll(".point").filter(function(dd,i){return dd.patient==d}).style('fill-opacity','0.9');
-    main.selectAll(".line").filter(function(dd,i){return dd==d}).style('stroke-opacity','0.9');
+    main.selectAll(".point").filter(function(dd,i){return dd.patient==d}).style('fill-opacity','0.9').style('stroke-opacity','0.9').attr("display","");
+    main.selectAll(".line").filter(function(dd,i){return dd==d}).style('stroke-opacity','0.9').attr("display","");
 }
 function filterbyPatientCancel(d){
 
-    main.selectAll(".point").filter(function(dd,i){return dd.patient==d}).style('fill-opacity','0.0');
-    main.selectAll(".line").filter(function(dd,i){return dd==d}).style('stroke-opacity','0.0');
+    main.selectAll(".point").filter(function(dd,i){return dd.patient==d}).attr("display","none");
+    main.selectAll(".line").filter(function(dd,i){return dd==d}).attr("display","none");
     setTimeout(function () {
         mouseoverPatientCount--;
         if(mouseoverPatientCount==0) {
             //console.log('called');
 
 
-            main.selectAll(".point").style('fill-opacity', '0.5');
-            main.selectAll(".line").style('stroke-opacity', '0.5');
+            main.selectAll(".point").style('fill-opacity', '0.5').style('stroke-opacity', '0.5').attr("display","");
+            main.selectAll(".line").style('stroke-opacity', '0.5').attr("display","");
         }
     },10);
 }
@@ -267,24 +274,24 @@ function filterbyAge(d) {
     if(mouseoverPatientCount==0) {
         main.selectAll(".point").filter(function (dd, i) {
             return dd.age != d
-        }).style('fill-opacity', '0.0');
+        }).attr("display","none");
     }
     mouseoverPatientCount++;
-    main.selectAll(".point").filter(function(dd,i){return dd.age>=d&&dd.prevAge<d}).style('fill-opacity',0.9);
-    main.selectAll(".line").filter(function (dd,i) {return patientsObjs[dd].firstDate<=d&&patientsObjs[dd].deathDate>=d}).style('stroke-opacity','0.5');
-    main.selectAll(".line").filter(function (dd,i) {return !(patientsObjs[dd].firstDate<=d&&patientsObjs[dd].deathDate>=d)}).style('stroke-opacity','0.0');
+    main.selectAll(".point").filter(function(dd,i){return dd.age>=d&&dd.prevAge<d}).style('fill-opacity',0.9).style('stroke-opacity',0.9).attr("display","");
+    main.selectAll(".line").filter(function (dd,i) {return patientsObjs[dd].firstDate<=d&&patientsObjs[dd].deathDate>=d}).style('stroke-opacity','0.5').attr("display","");
+    main.selectAll(".line").filter(function (dd,i) {return !(patientsObjs[dd].firstDate<=d&&patientsObjs[dd].deathDate>=d)}).attr("display","none");
     //main.selectAll(".point").filter(function(dd,i){return !(dd.age>=d&&dd.prevAge<d)}).style('fill-opacity','0.0');
 }
 function filterbyAgeCancel(d) {
-    main.selectAll(".point").filter(function(dd,i){return (dd.age>=d&&dd.prevAge<d)}).style('fill-opacity','0.0');
+    main.selectAll(".point").filter(function(dd,i){return (dd.age>=d&&dd.prevAge<d)}).attr("display","none");
     setTimeout(function () {
         mouseoverPatientCount--;
         if(mouseoverPatientCount==0) {
             //console.log('called');
 
             d3.select("#textInfo1").text("");
-            main.selectAll(".point").style('fill-opacity', '0.5');
-            main.selectAll(".line").style('stroke-opacity','0.5');
+            main.selectAll(".point").style('fill-opacity', '0.5').style('stroke-opacity','0.5').attr("display","");
+            main.selectAll(".line").style('stroke-opacity','0.5').attr("display","");
         }
     },10);
 }

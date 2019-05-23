@@ -42,11 +42,20 @@
 </div>
     <div class="container" style="height: 90vh">
         <div class="containerMainsvg" style=" width:100% ;height:calc(100% - 150px)">
+
             <svg id="mainsvg" width="100%" height="100%">
 
-                <text x="70" y="50" fill="black" id="textInfo1"></text>
-                <text x="70" y="70" fill="black" id="textInfo2"></text>
-                <text x="70" y="90" fill="black" id="textInfo3"></text>
+                <g id="info" transform="translate(70,50)">
+                    <text x="0" y="0" fill="black" id="textInfo1"></text>
+                    <text x="0" y="20" fill="black" id="textInfo2"></text>
+                    <text x="0" y="40" fill="black" id="textInfo3"></text>
+                </g>
+                <g id="infoPanel" transform="translate(10,10)" display="none">
+                    <rect x="0" y="0" width="200" height="200" fill="white" stroke="black" stroke-opacity="0.5" stroke-width="2" fill-opacity="1"></rect>
+                    <text x="10" y="20" fill="black" id="panelInfo1"></text>
+                    <text x="10" y="40" fill="black" id="panelInfo2"></text>
+                    <text x="10" y="60" fill="black" id="panelInfo3"></text>
+                </g>
             </svg>
         </div>
         <div class="containerMainsvg" style=" width:100% ;height:150px">
