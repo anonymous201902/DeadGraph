@@ -383,3 +383,5 @@ function drawCluster() {
         .style('stroke',d3.rgb(0,0,0))
         .style('stroke-opacity',0.05);
 }
+
+$("#noteModal").modal("show");
