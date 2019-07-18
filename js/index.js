@@ -52,9 +52,11 @@ var cluster;
 var patients=[];
 var patientsObjs={};
 var ages=[];
-var line=d3.svg.line().interpolate("cardinal")
-for (var yy=10;yy<120;yy++)
-    for (var mm=1;mm<=12;mm++)ages[ages.length]=yy+0.01*mm;
+var minage=99999;
+var maxage=0;
+var playStatus=0;
+var line=d3.svg.line().interpolate("cardinal");
+
 function getColorofPatient(p){
     return d3.hsl(parseInt(300*(patients.indexOf(p)/patients.length)),0.5,0.6)
 
@@ -136,6 +138,8 @@ function drawAxis() {
         maxX=(maxX<d.posX)?d.posX:maxX;
         minY=(minY>d.posY)?d.posY:minY;
         maxY=(maxY<d.posY)?d.posY:maxY;
+        minage=(minage>d.age)?d.age:minage;
+        maxage=(maxage<d.age)?d.age:maxage;
     }
     xScale = d3.scale.linear()
         .domain([minX, maxX])
@@ -229,7 +233,8 @@ function drawPoint(){
 }
 var mouseoverPatientCount=0;
 function drawControl() {
-
+    for (var yy=Math.floor(minage);yy<Math.ceil(maxage);yy++)
+        for (var mm=1;mm<=12;mm++)ages[ages.length]=yy+0.01*mm;
     var width=document.getElementById("mainsvg").width.baseVal.value;
     var height=document.getElementById("mainsvg").height.baseVal.value;
     control.selectAll('.patientRect').data(patients).enter()
