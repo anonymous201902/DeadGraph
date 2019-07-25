@@ -390,3 +390,30 @@ function drawCluster() {
 }
 
 $("#noteModal").modal("show");
+
+var playAgeIndex=-1;
+var playInterval;
+$("#btnPlay").click(function () {
+    if(playAgeIndex==-1){
+        playAgeIndex=0;
+        var d=ages[playAgeIndex];
+        d3.select("#textInfo1").text("Age："+d);
+        filterbyAge(d);
+        playInterval=setInterval(function () {
+            d=ages[playAgeIndex];
+            d3.select("#textInfo1").text("");
+            filterbyAgeCancel(d);
+            playAgeIndex=playAgeIndex+1;
+            playAgeIndex=playAgeIndex%ages.length;
+            d=ages[playAgeIndex];
+            d3.select("#textInfo1").text("Age："+d);
+            filterbyAge(d);
+        },25)
+    }else {
+        clearInterval(playInterval);
+        var d=ages[playAgeIndex];
+        d3.select("#textInfo1").text("");
+        filterbyAgeCancel(d);
+        playAgeIndex=-1;
+    }
+})
