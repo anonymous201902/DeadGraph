@@ -19,6 +19,7 @@ function type(d) {
     d.biomarker2_k=+d.biomarker2_k;
     d.cluster=+d.cluster;
     d.death_risk=+d.death_risk;
+    d.dead=+d.dead;
     d.id=+d.id;
     d.importance_of_biomarker1_albumin=+d.importance_of_biomarker1_albumin;
     d.importance_of_biomarker2_k=+d.importance_of_biomarker2_k;
@@ -212,7 +213,7 @@ function drawPoint(){
             d3.select("#infoPanel").attr("display","none");
             filterbyPatientCancel(d.patient);
         });
-    main.selectAll('.point').filter(function(dd,i){return dd.death_risk==1})
+    main.selectAll('.point').filter(function(dd,i){return dd.dead==1})
         .style('stroke',d3.rgb(0,0,0))
         .style('stroke-width',2)
         .style('stroke-opacity',0.5);
